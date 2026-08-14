@@ -1,22 +1,30 @@
-Expense Splitter
+# 💸 Expense Splitter
 
-A React + TypeScript application for splitting expenses between people.
+A simple React + TypeScript application for splitting expenses between people, tracking balances, and showing who should pay whom.
 
-Features:
-- Add, edit and delete people
-- Add, edit and delete expenses
+## ✨ Features
+
+- Add, edit, and delete people
+- Add, edit, and delete expenses
 - Equal expense splitting
 - Exact amount splitting
-- Balance calculation
+- Automatic balance calculation
 - Settlement suggestions
 - Local storage persistence
 - Responsive interface
+- Input validation
 
-Run locally:
+## 🛠️ Tech Stack
 
-npm install
-npm run dev
+- React
+- TypeScript
+- Vite
+- CSS
+- Local Storage
 
-Build:
+## 🚀 Run Locally
 
-npm run build
+Clone the repository:
+
+```bash
+git clone https://github.com/YOUR-USERNAME/expense-splitter.git
