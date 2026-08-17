@@ -288,7 +288,10 @@ export default function ExpenseForm({
           creating an expense.
         </p>
       ) : (
-        <form onSubmit={handleSubmit}>
+        <form
+          className="card"
+          onSubmit={handleSubmit}
+        >
           <div>
             <label>
               Description

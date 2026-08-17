@@ -8,10 +8,12 @@ type Props = {
     personId: string,
     newName: string
   ) => void
-  onDeletePerson: (personId: string) => void
+  onDeletePerson: (
+    personId: string
+  ) => void
 }
 
-function PeopleSection({
+export default function PeopleSection({
   people,
   onAddPerson,
   onRenamePerson,
@@ -24,9 +26,9 @@ function PeopleSection({
     useState('')
 
   function handleSubmit(
-    event: React.FormEvent<HTMLFormElement>
+    e: React.FormEvent
   ) {
-    event.preventDefault()
+    e.preventDefault()
 
     if (!name.trim()) return
 
@@ -34,107 +36,122 @@ function PeopleSection({
     setName('')
   }
 
-  function startEditing(person: Person) {
+  function startEdit(person: Person) {
     setEditingId(person.id)
     setEditingName(person.name)
   }
 
-  function saveEdit(personId: string) {
+  function saveEdit(
+    personId: string
+  ) {
     if (!editingName.trim()) return
 
-    onRenamePerson(personId, editingName)
+    onRenamePerson(
+      personId,
+      editingName
+    )
 
-    setEditingId(null)
-    setEditingName('')
-  }
-
-  function cancelEdit() {
     setEditingId(null)
     setEditingName('')
   }
 
   return (
-    <section>
+    <section className="card">
       <h2>People</h2>
 
-      <form onSubmit={handleSubmit}>
+      <form
+        className="row"
+        onSubmit={handleSubmit}
+      >
         <input
-          type="text"
           value={name}
-          onChange={event =>
-            setName(event.target.value)
+          onChange={e =>
+            setName(e.target.value)
           }
-          placeholder="Person name"
+          placeholder="Add a name..."
         />
 
         <button type="submit">
-          Add Person
+          Add
         </button>
       </form>
 
       {people.length === 0 ? (
-        <p>No people added yet.</p>
+        <p className="muted">
+          No one added yet. Start with at least two people.
+        </p>
       ) : (
-        <ul>
-          {people.map(person => (
-            <li key={person.id}>
-              {editingId === person.id ? (
-                <>
-                  <input
-                    type="text"
-                    value={editingName}
-                    onChange={event =>
-                      setEditingName(
-                        event.target.value
-                      )
-                    }
-                  />
+        <div className="chips">
+          {people.map(person =>
+            editingId === person.id ? (
+              <div
+                className="chip editing-chip"
+                key={person.id}
+              >
+                <input
+                  className="chip-edit"
+                  value={editingName}
+                  onChange={e =>
+                    setEditingName(
+                      e.target.value
+                    )
+                  }
+                />
 
-                  <button
-                    type="button"
-                    onClick={() =>
-                      saveEdit(person.id)
-                    }
-                  >
-                    Save
-                  </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    saveEdit(
+                      person.id
+                    )
+                  }
+                >
+                  Save
+                </button>
 
-                  <button
-                    type="button"
-                    onClick={cancelEdit}
-                  >
-                    Cancel
-                  </button>
-                </>
-              ) : (
-                <>
-                  <span>{person.name}</span>
+                <button
+                  type="button"
+                  className="ghost"
+                  onClick={() =>
+                    setEditingId(null)
+                  }
+                >
+                  Cancel
+                </button>
+              </div>
+            ) : (
+              <span
+                className="chip"
+                key={person.id}
+              >
+                {person.name}
 
-                  <button
-                    type="button"
-                    onClick={() =>
-                      startEditing(person)
-                    }
-                  >
-                    Edit
-                  </button>
+                <button
+                  type="button"
+                  className="chip-action"
+                  onClick={() =>
+                    startEdit(person)
+                  }
+                >
+                  Edit
+                </button>
 
-                  <button
-                    type="button"
-                    onClick={() =>
-                      onDeletePerson(person.id)
-                    }
-                  >
-                    Delete
-                  </button>
-                </>
-              )}
-            </li>
-          ))}
-        </ul>
+                <button
+                  type="button"
+                  className="chip-action danger"
+                  onClick={() =>
+                    onDeletePerson(
+                      person.id
+                    )
+                  }
+                >
+                  ×
+                </button>
+              </span>
+            )
+          )}
+        </div>
       )}
     </section>
   )
 }
-
-export default PeopleSection

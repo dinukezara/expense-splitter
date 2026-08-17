@@ -3,8 +3,8 @@ import type { Expense, Person } from './types'
 
 import PeopleSection from './components/PeopleSection'
 import ExpenseForm from './components/ExpenseForm'
-import Balances from './components/Balances'
 import ExpenseList from './components/ExpenseList'
+import Balances from './components/Balances'
 import { Settlements } from './components/Settlements'
 
 import { calculateBalances } from './utils/balances'
@@ -38,9 +38,7 @@ function App() {
   function addPerson(name: string) {
     const trimmed = name.trim()
 
-    if (!trimmed) {
-      return
-    }
+    if (!trimmed) return
 
     const alreadyExists = people.some(
       person =>
@@ -48,9 +46,7 @@ function App() {
         trimmed.toLowerCase()
     )
 
-    if (alreadyExists) {
-      return
-    }
+    if (alreadyExists) return
 
     setPeople(prev => [
       ...prev,
@@ -67,9 +63,7 @@ function App() {
   ) {
     const trimmed = newName.trim()
 
-    if (!trimmed) {
-      return
-    }
+    if (!trimmed) return
 
     const duplicate = people.some(
       person =>
@@ -78,9 +72,7 @@ function App() {
           trimmed.toLowerCase()
     )
 
-    if (duplicate) {
-      return
-    }
+    if (duplicate) return
 
     setPeople(prev =>
       prev.map(person =>
@@ -96,18 +88,12 @@ function App() {
 
   function deletePerson(personId: string) {
     const isUsedInExpense = expenses.some(
-      expense => {
-        const isPayer =
-          expense.paidBy === personId
-
-        const isParticipant =
-          expense.splits.some(
-            split =>
-              split.personId === personId
-          )
-
-        return isPayer || isParticipant
-      }
+      expense =>
+        expense.paidBy === personId ||
+        expense.splits.some(
+          split =>
+            split.personId === personId
+        )
     )
 
     if (isUsedInExpense) {
@@ -135,6 +121,13 @@ function App() {
   function deleteExpense(
     expenseId: string
   ) {
+    const confirmed =
+      window.confirm(
+        'Are you sure you want to delete this expense?'
+      )
+
+    if (!confirmed) return
+
     setExpenses(prev =>
       prev.filter(
         expense =>
@@ -164,47 +157,65 @@ function App() {
     setEditingExpense(null)
   }
 
-  function startEditingExpense(
-    expense: Expense
-  ) {
-    setEditingExpense(expense)
-  }
+  function resetAll() {
+    const confirmed =
+      window.confirm(
+        'Reset all people and expenses?'
+      )
 
-  function cancelEditingExpense() {
+    if (!confirmed) return
+
+    setPeople([])
+    setExpenses([])
     setEditingExpense(null)
   }
 
   return (
-    <main>
-      <h1>Expense Splitter</h1>
+    <main className="app">
+      <header className="header">
+        <div>
+          <h1>Expense Splitter</h1>
 
-      <div className="dashboard">
-        <PeopleSection
-          people={people}
-          onAddPerson={addPerson}
-          onRenamePerson={
-            renamePerson
-          }
-          onDeletePerson={
-            deletePerson
-          }
-        />
+          <p className="muted">
+            Add people → log expenses → view balances →
+            settle up. All amounts in LKR.
+          </p>
+        </div>
 
-        <ExpenseForm
-          people={people}
-          onAddExpense={addExpense}
-          editingExpense={
-            editingExpense
-          }
-          onUpdateExpense={
-            updateExpense
-          }
-          onCancelEdit={
-            cancelEditingExpense
-          }
-        />
+        <button
+          className="ghost"
+          type="button"
+          onClick={resetAll}
+        >
+          Reset
+        </button>
+      </header>
 
-        <div className="full-width">
+      <div className="layout">
+        <div className="col">
+          <PeopleSection
+            people={people}
+            onAddPerson={addPerson}
+            onRenamePerson={renamePerson}
+            onDeletePerson={deletePerson}
+          />
+
+          {people.length > 0 && (
+            <ExpenseForm
+              people={people}
+              onAddExpense={addExpense}
+              editingExpense={
+                editingExpense
+              }
+              onUpdateExpense={
+                updateExpense
+              }
+              onCancelEdit={() =>
+                setEditingExpense(null)
+              }
+            />
+          )}
+
           <ExpenseList
             expenses={expenses}
             people={people}
@@ -212,22 +223,24 @@ function App() {
               deleteExpense
             }
             onEditExpense={
-              startEditingExpense
+              setEditingExpense
             }
           />
         </div>
 
-        <Balances
-          people={people}
-          expenses={expenses}
-        />
+        <aside className="col">
+          <Balances
+            people={people}
+            expenses={expenses}
+          />
 
-        <Settlements
-          people={people}
-          settlements={
-            settlements
-          }
-        />
+          <Settlements
+            people={people}
+            settlements={
+              settlements
+            }
+          />
+        </aside>
       </div>
     </main>
   )
