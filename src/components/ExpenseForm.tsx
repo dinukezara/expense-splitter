@@ -136,29 +136,8 @@ export default function ExpenseForm({
       return
     }
 
-    const payerExists = people.some(
-      person => person.id === paidBy
-    )
-
-    if (!payerExists) {
-      setError('The selected payer no longer exists.')
-      return
-    }
-
     if (selectedPeople.length === 0) {
       setError('Select at least one participant.')
-      return
-    }
-
-    const allParticipantsExist =
-      selectedPeople.every(personId =>
-        people.some(person => person.id === personId)
-      )
-
-    if (!allParticipantsExist) {
-      setError(
-        'One or more selected participants no longer exist.'
-      )
       return
     }
 
@@ -248,17 +227,13 @@ export default function ExpenseForm({
               Number(value)
 
             if (
-              !Number.isFinite(
-                numberValue
-              ) ||
+              !Number.isFinite(numberValue) ||
               numberValue < 0
             ) {
               return sum
             }
 
-            return (
-              sum + toCents(value)
-            )
+            return sum + toCents(value)
           },
           0
         )
@@ -275,68 +250,59 @@ export default function ExpenseForm({
     totalCents - allocatedCents
 
   return (
-    <section>
+    <form
+      className="card"
+      onSubmit={handleSubmit}
+    >
       <h2>
         {editingExpense
-          ? 'Edit Expense'
-          : 'Add Expense'}
+          ? 'Edit expense'
+          : 'Log an expense'}
       </h2>
 
       {people.length < 2 ? (
-        <p>
-          Add at least two people before
-          creating an expense.
+        <p className="muted">
+          Add at least two people before creating an expense.
         </p>
       ) : (
-        <form
-          className="card"
-          onSubmit={handleSubmit}
-        >
-          <div>
+        <>
+          <div className="grid2">
             <label>
               Description
               <input
                 type="text"
-                placeholder="e.g. Dinner"
+                placeholder="Dinner"
                 value={description}
                 onChange={e => {
-                  setDescription(
-                    e.target.value
-                  )
+                  setDescription(e.target.value)
                   setError('')
                 }}
               />
             </label>
-          </div>
 
-          <div>
             <label>
               Amount (LKR)
               <input
                 type="number"
                 step="0.01"
                 min="0.01"
-                placeholder="e.g. 12000"
+                placeholder="12000.00"
                 value={amount}
                 onChange={e => {
-                  setAmount(
-                    e.target.value
-                  )
+                  setAmount(e.target.value)
                   setError('')
                 }}
               />
             </label>
           </div>
 
-          <div>
+          <div className="grid2">
             <label>
-              Who paid?
+              Paid by
               <select
                 value={paidBy}
                 onChange={e => {
-                  setPaidBy(
-                    e.target.value
-                  )
+                  setPaidBy(e.target.value)
                   setError('')
                 }}
               >
@@ -354,31 +320,7 @@ export default function ExpenseForm({
                 ))}
               </select>
             </label>
-          </div>
 
-          <div>
-            <p>Split between</p>
-
-            {people.map(person => (
-              <label key={person.id}>
-                <input
-                  type="checkbox"
-                  checked={selectedPeople.includes(
-                    person.id
-                  )}
-                  onChange={() =>
-                    togglePerson(
-                      person.id
-                    )
-                  }
-                />
-
-                {person.name}
-              </label>
-            ))}
-          </div>
-
-          <div>
             <label>
               Split type
               <select
@@ -389,128 +331,122 @@ export default function ExpenseForm({
                       | 'equal'
                       | 'exact'
                   )
-
                   setError('')
                 }}
               >
                 <option value="equal">
-                  Equal Split
+                  Equal split
                 </option>
-
                 <option value="exact">
-                  Exact Amount
+                  Exact amounts
                 </option>
               </select>
             </label>
           </div>
 
-          {splitType === 'exact' && (
-            <div>
-              <h3>Exact amounts</h3>
+          <p className="label">
+            Split between
+          </p>
 
-              {selectedPeople.length ===
-              0 ? (
-                <p>
-                  Select participants
-                  first.
-                </p>
-              ) : (
-                selectedPeople.map(
-                  personId => {
-                    const person =
-                      people.find(
-                        p =>
-                          p.id ===
-                          personId
-                      )
-
-                    return (
-                      <div
-                        key={personId}
-                      >
-                        <label>
-                          {person?.name}
-
-                          <input
-                            type="number"
-                            step="0.01"
-                            min="0"
-                            placeholder="0.00"
-                            value={
-                              exactAmounts[
-                                personId
-                              ] || ''
-                            }
-                            onChange={e =>
-                              updateExactAmount(
-                                personId,
-                                e.target
-                                  .value
-                              )
-                            }
-                          />
-                        </label>
-                      </div>
-                    )
-                  }
+          <div className="grid2">
+            {people.map(person => {
+              const selected =
+                selectedPeople.includes(
+                  person.id
                 )
-              )}
 
-              <div>
-                <p>
-                  Expense total:{' '}
-                  LKR{' '}
-                  {(
-                    totalCents / 100
-                  ).toFixed(2)}
-                </p>
+              return (
+                <div
+                  className="pill"
+                  key={person.id}
+                >
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={selected}
+                      onChange={() =>
+                        togglePerson(
+                          person.id
+                        )
+                      }
+                    />
 
-                <p>
-                  Allocated:{' '}
-                  LKR{' '}
-                  {(
-                    allocatedCents /
-                    100
-                  ).toFixed(2)}
-                </p>
+                    {person.name}
+                  </label>
 
-                <p>
-                  Remaining:{' '}
-                  LKR{' '}
-                  {(
-                    remainingCents /
-                    100
-                  ).toFixed(2)}
-                </p>
-              </div>
+                  {selected &&
+                  splitType === 'exact' ? (
+                    <input
+                      className="mini"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      placeholder="0.00"
+                      value={
+                        exactAmounts[
+                          person.id
+                        ] || ''
+                      }
+                      onChange={e =>
+                        updateExactAmount(
+                          person.id,
+                          e.target.value
+                        )
+                      }
+                    />
+                  ) : null}
+                </div>
+              )
+            })}
+          </div>
+
+          {splitType === 'exact' && (
+            <div className="item">
+              <p className="muted small">
+                Total: LKR{' '}
+                {(totalCents / 100).toFixed(2)}
+              </p>
+
+              <p className="muted small">
+                Allocated: LKR{' '}
+                {(allocatedCents / 100).toFixed(2)}
+              </p>
+
+              <p className="muted small">
+                Remaining: LKR{' '}
+                {(remainingCents / 100).toFixed(2)}
+              </p>
             </div>
           )}
 
           {error && (
-            <p role="alert">
+            <p className="error">
               {error}
             </p>
           )}
 
-          <button type="submit">
-            {editingExpense
-              ? 'Save Changes'
-              : 'Add Expense'}
-          </button>
-
-          {editingExpense && (
-            <button
-              type="button"
-              onClick={() => {
-                resetForm()
-                onCancelEdit?.()
-              }}
-            >
-              Cancel Edit
+          <div className="row">
+            <button type="submit">
+              {editingExpense
+                ? 'Save changes'
+                : 'Add expense'}
             </button>
-          )}
-        </form>
+
+            {editingExpense && (
+              <button
+                type="button"
+                className="ghost"
+                onClick={() => {
+                  resetForm()
+                  onCancelEdit?.()
+                }}
+              >
+                Cancel
+              </button>
+            )}
+          </div>
+        </>
       )}
-    </section>
+    </form>
   )
 }
